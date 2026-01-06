@@ -2,6 +2,9 @@ name: Branch Naming Check
 
 on:
   pull_request:
+    branches:
+      - main
+      - master
     types: [opened, synchronize, reopened, edited]
 
 permissions:
@@ -18,25 +21,16 @@ jobs:
         run: |
           BRANCH_NAME="${{ github.head_ref }}"
           BASE_BRANCH="${{ github.base_ref }}"
-          
-          echo "🔍 PRをチェック中: $BRANCH_NAME → $BASE_BRANCH"
-          
-          # Only enforce branch naming rules if targeting main or master
-          if [[ "$BASE_BRANCH" =~ ^(main|master)$ ]]; then
-            echo "📌 ターゲットは保護されたブランチです ($BASE_BRANCH)、ソースブランチ名を確認しています..."
-            
-            if [[ "$BRANCH_NAME" =~ ^(release-|hotfix-) ]]; then
-              echo "✅ ブランチ名は有効です: $BRANCH_NAME"
+   
+          if [[ "$BRANCH_NAME" =~ ^(release-|hotfix-) ]]; then
+            echo "✅ ブランチ名は有効です: $BRANCH_NAME"
               exit 0
-            else
-              echo "❌ エラー: 無効なブランチ名: $BRANCH_NAME"
-              echo "$BASE_BRANCH へマージする際は、ブランチ名は 'release-' または 'hotfix-' で始まる必要があります"
-              exit 1
-            fi
           else
-            echo "✅ ターゲットブランチは $BASE_BRANCH です (main/master ではありません)、チェック合格"
-            exit 0
+            echo "❌ エラー: 無効なブランチ名: $BRANCH_NAME"
+            echo "$BASE_BRANCH へマージする際は、ブランチ名は 'release-' または 'hotfix-' で始まる必要があります"
+            exit 1
           fi
+          
       
       - name: Comment on PR
         if: failure()
